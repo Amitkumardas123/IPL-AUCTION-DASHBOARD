@@ -73,7 +73,7 @@ The complete auction process is managed using Google Apps Script automation inte
 
 📺 Watch the complete project walkthrough here:
 
-[▶️ Video Presentation](https://github.com/Amitkumardas123/IPL-AUCTION-DASHBOARD/blob/4089e4802e5488e41a324668618b22b7cca41789/Video%20Presentation.mp4)
+[▶️ Video Presentation](https://drive.google.com/file/d/1In8IclvLq0SxhyVIQWF9YsKqXQQocRDK/view?usp=sharing)
 
 ---
 # 📸 Screenshots
