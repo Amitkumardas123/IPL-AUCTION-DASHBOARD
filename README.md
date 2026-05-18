@@ -114,19 +114,6 @@ Dashboard displays:
 
 ---
 
-# 📸 Screenshots
-
-## Dashboard Preview
-_Add dashboard screenshot here_
-
-## Live Auction Interface
-_Add bidding screenshot here_
-
-## Team Budget Tracking
-_Add budget tracking screenshot here_
-
----
-
 # 🔧 Setup Instructions
 
 ## Step 1
