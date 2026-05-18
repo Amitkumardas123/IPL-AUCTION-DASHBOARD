@@ -1,0 +1,184 @@
+function onOpen() {
+  SpreadsheetApp.getActiveSpreadsheet().toast("hey! lets start Bidding..")
+}
+
+function pickRandomPlayer() {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var playersheet = ss.getSheetByName("Player list");
+  var auctionsheet = ss.getSheetByName("Auction");
+
+  // Get complete table
+  var data = playersheet.getRange("A2:E61").getValues();
+
+  var unsoldPlayers = [];
+
+  for (var i = 0; i < data.length; i++) {
+
+    var playerName = data[i][0]; // Column A
+    var category = data[i][3];   // Column D
+    var status = data[i][4];     // Column E
+
+    if (status == "Unsold") {
+
+      unsoldPlayers.push([playerName, category]);
+
+    }
+  }
+
+  // If all sold
+  if (unsoldPlayers.length == 0) {
+
+    playersheet.getRange("J1").setValue("All players sold");
+    playersheet.getRange("J2").clearContent();
+
+    return;
+  }
+
+  // Random player
+  var randomIndex = Math.floor(Math.random() * unsoldPlayers.length);
+
+  var randomPlayer = unsoldPlayers[randomIndex][0];
+  var randomCategory = unsoldPlayers[randomIndex][1];
+
+  // Set values
+  playersheet.getRange("J1").setValue(randomPlayer);
+  playersheet.getRange("J2").setValue(randomCategory);
+
+  auctionsheet.getRange("B32").setValue(randomPlayer);
+
+}
+function bidOnPlayer(teamnamecell,teambalancecell,playertypecell) {
+
+  var auctionsheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Auction");
+  var playersheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Player list");
+
+  var ui = SpreadsheetApp.getUi();
+  var increament = 100000.00;
+  
+  var currentprice = auctionsheet.getRange("B35").getValue();
+  var isfirstbid = false;
+
+  if (!currentprice  || currentprice == 0) {
+    currentprice = auctionsheet.getRange("B34").getValue();
+    isfirstbid = true;
+  }
+  // Validate Function
+  if (!teamnamecell || !teambalancecell || !playertypecell) {
+  SpreadsheetApp.getActiveSpreadsheet().toast("Invalid input: teamnamecell,teambalancecell or playertypecell is missing.");
+  return;
+  }
+
+  var teamname = auctionsheet.getRange(teamnamecell).getValue();
+  var teambalance = auctionsheet.getRange(teambalancecell).getValue();
+
+ 
+
+  // Checking firstbid or not
+  var requireamount = isfirstbid ? currentprice : currentprice + increament;
+
+
+  if (teambalance < requireamount) {
+    SpreadsheetApp.getActiveSpreadsheet().toast(teamname + " does not have enough balance.");
+    return;
+  }
+  // Check if the current player is Overseas
+  var overseasplayercount = auctionsheet.getRange(playertypecell).getValue();
+  var playerType = playersheet.getRange("J2").getValue();
+
+  if (playerType == "Overseas" && overseasplayercount == 5) {
+    ui.alert(teamname + " has already 5 overseas players. Cannot bid on another overseas player.");
+    return;
+  }
+
+  auctionsheet.getRange("B35").setValue(requireamount);
+  auctionsheet.getRange("B36").setValue(teamname);
+}
+
+// BID for KKR
+function bidOnplayerforteamK(){
+  teamnamecell = "A4";
+  teambalancecell = "C4";
+  playertypecell = "B28";
+  bidOnPlayer(teamnamecell,teambalancecell,playertypecell);
+}
+// BID for RCB
+function bidOnplayerforteamR(){
+  teamnamecell = "E4";
+  teambalancecell = "G4";
+  playertypecell = "F28";
+  bidOnPlayer(teamnamecell,teambalancecell,playertypecell);
+}
+// BID for MI
+function bidOnplayerforteamM(){
+  teamnamecell = "I4";
+  teambalancecell = "K4";
+  playertypecell = "J28";
+  bidOnPlayer(teamnamecell,teambalancecell,playertypecell);
+}
+/// BID for CSK
+function bidOnplayerforteamC(){
+  teamnamecell = "M4";
+  teambalancecell = "O4";
+  playertypecell = "N28";
+  bidOnPlayer(teamnamecell,teambalancecell,playertypecell);
+}
+
+function markplayersSold() {
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var auctionsheet = sheet.getSheetByName("Auction");
+  var playerssheet = sheet.getSheetByName("Player list");
+
+  var playername = auctionsheet.getRange("B32").getValue();
+  var saleprice = auctionsheet.getRange("B35").getValue();
+  var soldteam = auctionsheet.getRange("B36").getValue();
+
+  auctionsheet.getRange("N32").setValue(playername);
+  auctionsheet.getRange("N34").setValue(soldteam);
+  auctionsheet.getRange("N35").setValue(saleprice);
+
+  auctionsheet.getRange("B35:B36").clearContent();
+
+  var data = playerssheet.getRange("A2:A61").getValues();
+
+  for (var i = 0; i < data.length; i++) {
+    if (data[i][0] == playername) {
+      playerssheet.getRange( i + 2, 5).setValue("Sold");
+      playerssheet.getRange( i + 2, 6).setValue(soldteam);
+      playerssheet.getRange( i + 2 ,3).setValue(saleprice);
+    }
+  }
+
+ // Entry column for sold players In Auction sheet
+  var entrycolumn = 1;
+
+  if (soldteam == "Royal Challengers Bangalore") {
+    entrycolumn = 5;
+  }
+  else if (soldteam == "Mumbai Indians          ") {
+    entrycolumn = 9;
+  }
+  else if (soldteam == "Chennai Super Kings") {
+    entrycolumn = 13;
+  }
+
+  // I want values from 7th row to next 20th row thats why 20 in values
+  var insertrow = 7;
+  var values = auctionsheet.getRange(insertrow,entrycolumn,20).getValues();
+
+  for (var i = 0; i<values.length;i++) {
+    if (values[i][0] == 0 || values[i][0] == null){
+      insertrow = i + 7
+      break;
+    }
+  }
+  // Insert Data
+  auctionsheet.getRange(insertrow,entrycolumn,1,2).setValues([[playername,saleprice]]);
+
+  SpreadsheetApp.getActiveSpreadsheet().toast(playername + " was sold to "+ soldteam + " for a whopping Rs. " + saleprice);
+  
+  pickRandomPlayer();
+}
+
